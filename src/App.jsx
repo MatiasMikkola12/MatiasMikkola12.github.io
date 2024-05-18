@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useSpring, animated } from 'react-spring';
+import { useInView } from 'react-intersection-observer';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+    const headerAnimation = useSpring({
+        from: { opacity: 0, transform: 'translateY(30px)' },
+        to: { opacity: 1, transform: 'translateY(0)' },
+        delay: 200
+    });
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const { ref, inView } = useInView({
+        triggerOnce: true,
+        threshold: 0.3
+    });
+
+    const workAnimation = useSpring({
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'translateY(0)' : 'translateY(50px)'
+    });
+
+    const useFadeIn = () => {
+        const [ref, inView] = useInView({
+            triggerOnce: true,
+            threshold: 0.3
+        });
+        return {
+            ref,
+            style: useSpring({
+                opacity: inView ? 1 : 0,
+                transform: inView ? 'translateY(0)' : 'translateY(50px)'
+            })
+        };
+    };
+
+    const project1Animation = useFadeIn();
+    const project2Animation = useFadeIn();
+    const project3Animation = useFadeIn();
+
+    return (
+        <div className="App">
+            <animated.div style={headerAnimation} className="header">
+                <h1>Matias Mikkola</h1>
+                <p>Software Engineer, some content coming up.</p>
+            </animated.div>
+            <animated.div ref={ref} style={workAnimation} className="section">
+                <h1>Work</h1>
+                <animated.div {...project1Animation} className="sub-section">
+                    <p>Project 1 Description: This project involved...</p>
+                </animated.div>
+                <animated.div {...project2Animation} className="sub-section">
+                    <p>Project 2 Overview: In this work, I focused on...</p>
+                </animated.div>
+                <animated.div {...project3Animation} className="sub-section">
+                    <p>Project 3 Summary: The main challenges were...</p>
+                </animated.div>
+            </animated.div>
+        </div>
+    );
 }
 
-export default App
+export default App;
